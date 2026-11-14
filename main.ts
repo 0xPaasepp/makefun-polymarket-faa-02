@@ -11,9 +11,11 @@
 //   - Asymmetry flipped vs nvidia (up 1.3x, down 0.8x): prices sit near
 //     0, so down moves are bounded by the price itself while a news
 //     break can spike a market +0.2 in a minute. Upside tail risk rules.
-//   - SIGMA_MAX 0.008 -> 0.02: the family's opening jumps (0.08-0.215
-//     in a minute) are far bigger than the NVIDIA event's; the cap must
-//     not strangle the spread right after a jump.
+//   - SIGMA_MAX 0.008 (NOT 0.02): tested both — the wider cap lets a
+//     crash inflate sigma and the quantiles spread far too wide around
+//     a center that is already moving (pseudo-case 0.881 at 0.02 vs
+//     0.613 at 0.008, practice 0.292 vs 0.286). Tight cap + decaying
+//     center beats wide spreads in a crash.
 // Kept from v3: per-market EWMA vol (halflife 8 + 1440 floor), point-mass
 // mixture over a Student-t(3) jump distribution, h^0.41 horizon scaling,
 // level vol floor 0.005*sqrt(x).
@@ -53,7 +55,7 @@ const T3_TABLE = [
   1.4265,1.5042,1.595,1.7035,1.8374,2.0103,2.2494,2.6216,3.3723,
 ];
 const SIGMA_MIN = 0.0003;
-const SIGMA_MAX = 0.02;
+const SIGMA_MAX = 0.008;
 const HL_SHORT = 8; // minutes, EWMA halflife for recent vol
 const HL_LONG = 1440; // minutes, EWMA halflife for jump-risk floor
 const LONG_K = 0.3; // floor = LONG_K * long-term vol
